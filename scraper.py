@@ -1,6 +1,8 @@
+import time
+from typing import Dict, Any, List
+
 import requests
 from bs4 import BeautifulSoup
-from typing import Dict, Any
 
 def get_book_data(book_url: str) -> dict:
     """
