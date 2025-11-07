@@ -124,3 +124,133 @@ def _extract_product_information(soup: BeautifulSoup) -> dict:
                 product_info[key] = value.text.strip()
 
     return product_info
+
+def scrape_books(save_to_file=False, base_url="http://books.toscrape.com"):
+    """
+    Парсит все страницы каталога книг и собирает данные о книгах.
+    
+    Args:
+        save_to_file (bool): Флаг для сохранения результатов в файл
+        base_url (str): Базовый URL каталога
+        
+    Returns:
+        list: Список словарей с данными о книгах
+    """
+    all_books_data = []
+    page_number = 1
+    
+    while True:
+        # Формируем URL страницы - исправлен путь
+        if page_number == 1:
+            url = f"{base_url}/catalogue/page-1.html"
+        else:
+            url = f"{base_url}/catalogue/page-{page_number}.html"
+        
+        try:
+            print(f"Парсинг страницы {page_number}...")
+            response = requests.get(url)
+            response.raise_for_status()
+            
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            # Проверяем, есть ли книги на странице - исправленный селектор
+            books = soup.find_all('article', class_='product_pod')
+            print(f"Найдено книг на странице: {len(books)}")
+            
+            if not books:
+                print("Больше книг не найдено. Завершение...")
+                break
+            
+            # Парсим данные о каждой книге на странице
+            for book in books:
+                try:
+                    # Получаем ссылку на страницу книги
+                    book_link_element = book.find('h3').find('a')
+                    if not book_link_element:
+                        continue
+                        
+                    book_link = book_link_element['href']
+                    
+                    # Обрабатываем относительные ссылки
+                    if book_link.startswith('../../../'):
+                        book_link = book_link.replace('../../../', 'http://books.toscrape.com/catalogue/')
+                    elif book_link.startswith('../'):
+                        book_link = book_link.replace('../', f'{base_url}/catalogue/')
+                    elif not book_link.startswith('http'):
+                        book_link = f'{base_url}/catalogue/{book_link}'
+                    
+                    print(f"  Обрабатывается книга: {book_link}")
+                    
+                    # Получаем данные о книге используя вашу функцию
+                    book_data = get_book_data(book_link)
+                    all_books_data.append(book_data)
+                    print(f"  ✓ Обработана: {book_data.get('title', 'Unknown')}")
+                    
+                except Exception as e:
+                    print(f"  ✗ Ошибка при обработке книги: {e}")
+                    continue
+            
+            # Проверяем наличие следующей страницы
+            next_button = soup.find('li', class_='next')
+            if not next_button:
+                print("Достигнута последняя страница.")
+                break
+                
+            page_number += 1
+            
+            # Небольшая задержка чтобы не перегружать сервер
+            time.sleep(1)
+            
+        except requests.exceptions.HTTPError as e:
+            if response.status_code == 404:
+                print("Достигнута последняя страница (404).")
+                break
+            else:
+                print(f"Ошибка HTTP при запросе {url}: {e}")
+                break
+        except Exception as e:
+            print(f"Ошибка при парсинге страницы {page_number}: {e}")
+            break
+    
+    # Сохранение в файл если указан флаг
+    if save_to_file and all_books_data:
+        save_books_to_file(all_books_data)
+    
+    print(f"Парсинг завершен. Найдено книг: {len(all_books_data)}")
+    return all_books_data
+
+
+def save_books_to_file(books_data, filename="books_data.txt"):
+    """
+    Сохраняет данные о книгах в текстовый файл.
+    
+    Args:
+        books_data (list): Список словарей с данными о книгах
+        filename (str): Имя файла для сохранения
+    """
+    try:
+        with open(filename, 'w', encoding='utf-8') as file:
+            for i, book in enumerate(books_data, 1):
+                file.write(f"Книга #{i}\n")
+                file.write(f"Название: {book.get('title', 'N/A')}\n")
+                file.write(f"Цена: {book.get('price', 'N/A')}\n")
+                file.write(f"Рейтинг: {book.get('rating', 'N/A')}\n")
+                file.write(f"Наличие: {book.get('availability', 'N/A')}\n")
+                
+                description = book.get('description', 'N/A')
+                if len(description) > 200:
+                    description = description[:200] + "..."
+                file.write(f"Описание: {description}\n")
+                
+                # Записываем дополнительную информацию
+                product_info = book.get('product_information', {})
+                if product_info:
+                    file.write("Дополнительная информация:\n")
+                    for key, value in product_info.items():
+                        file.write(f"  {key}: {value}\n")
+                
+                file.write("=" * 60 + "\n")
+        
+        print(f"Данные сохранены в файл: {filename}")
+    except Exception as e:
+        print(f"Ошибка при сохранении в файл: {e}")
