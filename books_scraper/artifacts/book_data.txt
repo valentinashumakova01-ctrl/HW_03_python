@@ -1,0 +1,21 @@
+============================================================
+ДАННЫЕ О КНИГЕ
+============================================================
+
+Название: A Light in the Attic
+Цена: £51.77
+Рейтинг: Three
+Наличие: In stock (22 available)
+Описание: It's hard to imagine a world without A Light in the Attic. This now-classic collection of poetry and drawings from Shel Silverstein celebrates its 20th anniversary with this special edition. Silverste...
+
+ДОПОЛНИТЕЛЬНАЯ ИНФОРМАЦИЯ:
+  UPC: a897fe39b1053632
+  Product Type: Books
+  Price (excl. tax): £51.77
+  Price (incl. tax): £51.77
+  Tax: £0.00
+  Availability: In stock (22 available)
+  Number of reviews: 0
+
+URL: http://books.toscrape.com/catalogue/a-light-in-the-attic_1000/index.html
+Время сбора: 2025-11-09 11:24:47
