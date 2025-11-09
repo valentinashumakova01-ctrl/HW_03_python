@@ -1,9 +1,7 @@
-Books Scraper
-
+# Books Scraper
 Проект для автоматического сбора данных о книгах с сайта Books to Scrape.
 
-Цель проекта
-
+## Цель проекта
 Разработать систему для парсинга информации о книгах, включая:
 
 Сбор данных с отдельных страниц книг
@@ -24,22 +22,19 @@ schedule - для планирования автоматического зап
 pytest - для написания тестов
 Инструкции по запуску
 
-Установка зависимостей
-
+## Установка зависимостей
 pip install requests beautifulsoup4 schedule pytest
-
 from books_scraper import scrape_books
 
-Запуск парсинга всех книг с сохранением в файл
+## Запуск парсинга всех книг с сохранением в файл
 books_data = scrape_books(save_to_file=True)
 
-Запуск без сохранения в файл
+## Запуск без сохранения в файл
 books_data = scrape_books(save_to_file=False)
 
-Парсинг одной книги
+## Парсинг одной книги
 from books_scraper import get_book_data
-
 book_url = 'http://books.toscrape.com/catalogue/a-light-in-the-attic_1000/index.html' book_data = get_book_data(book_url) print(book_data)
 
-Запуск тестов
+## Запуск тестов
 pytest tests/
